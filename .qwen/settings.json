@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(icacls *)",
+      "Bash(oi)",
+      "Bash(ci)",
+      "Bash(r *)",
+      "Bash(iisreset)",
+      "Bash(%windir%\\system32\\inetsrv\\appcmd.exe *)",
+      "Bash(npm install)",
+      "Bash(node *)",
+      "Bash(curl *)",
+      "Bash(timeout *)",
+      "Bash(start *)",
+      "Bash(taskkill *)",
+      "Bash(start-sleep *)",
+      "Bash(start.bat)",
+      "Bash(npm *)",
+      "Bash(del *)",
+      "Bash(create-deployment-package.bat)",
+      "Bash(netstat *)",
+      "Bash(findstr *)",
+      "Bash(tasklist)",
+      "Bash(type *)"
+    ]
+  },
+  "$version": 3
+}
