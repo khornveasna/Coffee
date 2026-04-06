@@ -30,12 +30,6 @@
                     <i class="fas fa-sign-in-alt"></i> ចូលប្រើប្រាស់
                 </button>
             </form>
-            <div class="login-demo">
-                <p><i class="fas fa-info-circle"></i> សាកល្បង: admin / 1234</p>
-                <a href="reset.html" style="display: inline-block; margin-top: 10px; padding: 8px 15px; background: var(--warning); color: white; border-radius: 5px; text-decoration: none; font-size: 12px;">
-                    <i class="fas fa-trash"></i> លុបទិន្នន័យទាំងអស់
-                </a>
-            </div>
         </div>
     </div>
 
@@ -102,19 +96,11 @@
                     <div class="products-section">
                         <div class="search-bar">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="searchProduct" placeholder="ស្វែងរកមុខម្ហូប...">
+                            <input type="text" id="searchProduct" placeholder="ស្វែងរកភេសជ្ជៈ...">
                         </div>
 
                         <div class="categories">
-                            <button class="category-btn active" data-category="all">
-                                <i class="fas fa-th"></i> ទាំងអស់
-                            </button>
-                            <button class="category-btn" data-category="coffee">
-                                <i class="fas fa-coffee"></i> កាហ្វេ
-                            </button>
-                            <button class="category-btn" data-category="tea">
-                                <i class="fas fa-leaf"></i> តែបៃតង
-                            </button>
+                            <!-- Category buttons will be loaded dynamically -->
                         </div>
 
                         <div class="products-grid" id="productsGrid">
@@ -134,7 +120,7 @@
                         <div class="cart-items" id="cartItems">
                             <div class="empty-cart">
                                 <i class="fas fa-shopping-cart"></i>
-                                <p>គ្មានមុខម្ហូបក្នុងរទេះ</p>
+                                <p>គ្មានភេសជ្ជៈក្នុងរទេះ</p>
                             </div>
                         </div>
 
@@ -174,10 +160,13 @@
             <!-- Items Management Page -->
             <div id="itemsPage" class="page hidden">
                 <header class="page-header">
-                    <h1><i class="fas fa-box"></i> គ្រប់គ្រងមុខម្ហូប</h1>
+                    <h1><i class="fas fa-box"></i> គ្រប់គ្រងភេសជ្ជៈ</h1>
                     <div class="header-actions">
+                        <button id="manageCategoriesBtn" class="btn-action">
+                            <i class="fas fa-tags"></i> គ្រប់គ្រងប្រភេទ
+                        </button>
                         <button id="addItemBtn" class="btn-action">
-                            <i class="fas fa-plus"></i> បន្ថែមមុខម្ហូប
+                            <i class="fas fa-plus"></i> បន្ថែមភេសជ្ជៈ
                         </button>
                     </div>
                 </header>
@@ -186,12 +175,10 @@
                     <div class="search-filter">
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="searchItem" placeholder="ស្វែងរកមុខម្ហូប...">
+                            <input type="text" id="searchItem" placeholder="ស្វែងរកភេសជ្ជៈ...">
                         </div>
                         <select id="filterCategory" class="filter-select">
                             <option value="all">គ្រប់ប្រភេទ</option>
-                            <option value="coffee">កាហ្វេ</option>
-                            <option value="tea">តែបៃតង</option>
                         </select>
                     </div>
 
@@ -220,7 +207,7 @@
                                 <th>ល.រ</th>
                                 <th>លេខវិក័យបត្រ</th>
                                 <th>កាលបរិច្ឆេទ</th>
-                                <th>មុខម្ហូប</th>
+                                <th>ភេសជ្ជៈ</th>
                                 <th>ចំនួន</th>
                                 <th>សរុប</th>
                                 <th>បញ្ចុះ</th>
@@ -291,7 +278,7 @@
                                 <i class="fas fa-coffee"></i>
                             </div>
                             <div class="report-info">
-                                <h4>មុខម្ហូបលក់ដាច់</h4>
+                                <h4>ភេសជ្ជៈលក់ដាច់</h4>
                                 <h2 id="topProduct">-</h2>
                             </div>
                         </div>
@@ -319,7 +306,7 @@
                                     <span id="reportTotalDiscount">0៛</span>
                                 </div>
                                 <div class="stat-box">
-                                    <label>ចំនួនមុខម្ហូបលក់</label>
+                                    <label>ចំនួនភេសជ្ជៈលក់</label>
                                     <span id="reportItemsSold">0</span>
                                 </div>
                                 <div class="stat-box">
@@ -330,7 +317,7 @@
                         </div>
 
                         <div class="report-section">
-                            <h3><i class="fas fa-trophy"></i> មុខម្ហូបលក់ដាច់ 5 មុខ</h3>
+                            <h3><i class="fas fa-trophy"></i> ភេសជ្ជៈលក់ដាច់ 5 មុខ</h3>
                             <div class="top-products" id="topProductsList">
                                 <!-- Top products will be loaded here -->
                             </div>
@@ -460,15 +447,15 @@
     <div id="itemModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="itemModalTitle"><i class="fas fa-plus"></i> បន្ថែមមុខម្ហូប</h2>
+                <h2 id="itemModalTitle"><i class="fas fa-plus"></i> បន្ថែមភេសជ្ជៈ</h2>
                 <button class="modal-close">&times;</button>
             </div>
             <form id="itemForm">
                 <div class="modal-body">
                     <input type="hidden" id="itemId">
-                    
+
                     <div class="form-group image-upload-group">
-                        <label>រូបភាពមុខម្ហូប</label>
+                        <label>រូបភាពភេសជ្ជៈ</label>
                         <div class="image-upload">
                             <input type="file" id="itemImageFile" accept="image/*" onchange="pos.previewImage(this)">
                             <input type="hidden" id="itemImage">
@@ -483,15 +470,13 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>ឈ្មោះមុខម្ហូប *</label>
+                            <label>ឈ្មោះភេសជ្ជៈ *</label>
                             <input type="text" id="itemName" required placeholder="បញ្ចូលឈ្មោះ">
                         </div>
                         <div class="form-group">
                             <label>ប្រភេទ *</label>
                             <select id="itemCategory" required>
                                 <option value="">ជ្រើសរើសប្រភេទ</option>
-                                <option value="coffee">កាហ្វេ</option>
-                                <option value="tea">តែបៃតង</option>
                             </select>
                         </div>
                     </div>
@@ -518,6 +503,38 @@
                             <input type="checkbox" id="itemActive" checked>
                             <label for="itemActive">ដាក់លក់</label>
                         </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel modal-close">បោះបង់</button>
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i> រក្សាទុក
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle"><i class="fas fa-plus"></i> បន្ថែមប្រភេទ</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="categoryForm">
+                <div class="modal-body">
+                    <input type="hidden" id="categoryId">
+
+                    <div class="form-group">
+                        <label>ឈ្មោះប្រភេទ (អង់គ្លេស) *</label>
+                        <input type="text" id="categoryNameEn" required placeholder="ឧទាហរណ៍: coffee, tea, juice">
+                        <small style="color: var(--text-light); margin-top: 4px; display: block;">ប្រើអក្សរតូច និងគ្មានចន្លោះ (ឧ. coffee, green_tea)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ឈ្មោះប្រភេទ (ខ្មែរ) *</label>
+                        <input type="text" id="categoryNameKm" required placeholder="ឧទាហរណ៍: កាហ្វេ, តែបៃតង">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -575,7 +592,7 @@
                             </label>
                             <label class="permission-item">
                                 <input type="checkbox" id="permItems" checked>
-                                <span>គ្រប់គ្រងមុខម្ហូប</span>
+                                <span>គ្រប់គ្រងភេសជ្ជៈ</span>
                             </label>
                             <label class="permission-item">
                                 <input type="checkbox" id="permOrders" checked>
@@ -635,6 +652,7 @@
     <script src="/js/socket.js"></script>
     <script src="/js/pos.js"></script>
     <script src="/js/items.js"></script>
+    <script src="/js/categories.js"></script>
     <script src="/js/orders.js"></script>
     <script src="/js/reports.js"></script>
     <script src="/js/users.js"></script>

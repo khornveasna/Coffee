@@ -1,5 +1,33 @@
 // POS: products grid, cart, checkout, print receipt
 
+CoffeePOS.prototype.renderCategoryButtons = function () {
+    const container = document.querySelector('.categories');
+    const categories = this.data.categories || [];
+    const currentCategory = this.currentCategory || 'all';
+    
+    let html = `<button class="category-btn ${currentCategory === 'all' ? 'active' : ''}" data-category="all">
+                    <i class="fas fa-th"></i> ទាំងអស់
+                </button>`;
+    
+    categories.forEach(cat => {
+        html += `<button class="category-btn ${currentCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">
+                    <i class="fas ${cat.icon || 'fa-box'}"></i> ${cat.name_km || cat.name}
+                </button>`;
+    });
+    
+    container.innerHTML = html;
+    
+    // Rebind events
+    container.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            container.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.currentCategory = btn.dataset.category;
+            this.renderProducts();
+        });
+    });
+};
+
 CoffeePOS.prototype.renderProducts = function () {
     const grid       = document.getElementById('productsGrid');
     const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
@@ -16,7 +44,7 @@ CoffeePOS.prototype.renderProducts = function () {
         grid.innerHTML = `
             <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-light);">
                 <i class="fas fa-search" style="font-size:48px;margin-bottom:15px;opacity:0.3;"></i>
-                <p>គ្មានមុខម្ហូបត្រូវនឹងការស្វែងរក</p>
+                <p>គ្មានភេសជ្ជៈត្រូវនឹងការស្វែងរក</p>
             </div>`;
         return;
     }
@@ -24,7 +52,7 @@ CoffeePOS.prototype.renderProducts = function () {
     grid.innerHTML = products.map(p => {
         const hasSale = p.salePrice && p.salePrice > 0;
         return `
-            <div class="product-card" data-id="${p.id}" onclick="pos.addToCart(${p.id})">
+            <div class="product-card" data-id="${p.id}" onclick="pos.addToCart('${p.id}')">
                 ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<div class="product-icon"><i class="fas ${p.icon}"></i></div>`}
                 <h3>${p.name}</h3>
                 ${hasSale
@@ -35,10 +63,11 @@ CoffeePOS.prototype.renderProducts = function () {
 };
 
 CoffeePOS.prototype.addToCart = function (productId) {
-    const product = this.data.products.find(p => p.id === productId);
+    const idStr = String(productId);
+    const product = this.data.products.find(p => String(p.id) === idStr);
     if (!product) return;
 
-    const existing = this.cart.find(item => item.id === productId);
+    const existing = this.cart.find(item => String(item.id) === idStr);
     if (existing) {
         existing.quantity++;
     } else {
@@ -60,7 +89,7 @@ CoffeePOS.prototype.renderCart = function () {
     const cartItems = document.getElementById('cartItems');
 
     if (this.cart.length === 0) {
-        cartItems.innerHTML = `<div class="empty-cart"><i class="fas fa-shopping-cart"></i><p>គ្មានមុខម្ហូបក្នុងរទេះ</p></div>`;
+        cartItems.innerHTML = `<div class="empty-cart"><i class="fas fa-shopping-cart"></i><p>គ្មានភេសជ្ជៈក្នុងរទេះ</p></div>`;
         document.getElementById('checkoutBtn').disabled = true;
     } else {
         cartItems.innerHTML = this.cart.map((item, i) => `

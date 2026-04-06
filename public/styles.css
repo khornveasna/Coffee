@@ -1390,6 +1390,27 @@ body {
     font-size: 13px;
 }
 
+.icon-picker {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.icon-picker input[type="text"] {
+    flex: 1;
+}
+
+.icon-preview {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+}
+
 .image-preview {
     position: relative;
     display: inline-block;
@@ -2729,3 +2750,8 @@ body {
     }
     */
 }
+The string is missing the terminator: '@.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordEx 
+   ception
+    + FullyQualifiedErrorId : TerminatorExpectedAtEndOfString
+ 

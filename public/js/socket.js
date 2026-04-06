@@ -67,21 +67,21 @@ CoffeePOS.prototype.handleOrderDeleted = function (data) {
 
 CoffeePOS.prototype.handleProductCreated = function (data) {
     console.log('📦 Product created:', data);
-    this.showToast('មុខម្ហូបថ្មីត្រូវបានបន្ថែម!', 'success');
+    this.showToast('ភេសជ្ជៈថ្មីត្រូវបានបន្ថែម!', 'success');
     if (this.currentPage === 'pos')   this.renderProducts();
     if (this.currentPage === 'items') this.renderItems();
 };
 
 CoffeePOS.prototype.handleProductUpdated = function (data) {
     console.log('📦 Product updated:', data);
-    this.showToast('មុខម្ហូបត្រូវបានកែសម្រួល!', 'success');
+    this.showToast('ភេសជ្ជៈត្រូវបានកែសម្រួល!', 'success');
     if (this.currentPage === 'pos')   this.renderProducts();
     if (this.currentPage === 'items') this.renderItems();
 };
 
 CoffeePOS.prototype.handleProductDeleted = function (data) {
     console.log('🗑️ Product deleted:', data);
-    this.showToast('មុខម្ហូបត្រូវបានលុប!', 'warning');
+    this.showToast('ភេសជ្ជៈត្រូវបានលុប!', 'warning');
     if (this.currentPage === 'pos')   this.renderProducts();
     if (this.currentPage === 'items') this.renderItems();
 };

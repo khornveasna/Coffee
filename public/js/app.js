@@ -33,16 +33,6 @@ class CoffeePOS {
             item.addEventListener('click', e => { e.preventDefault(); this.navigate(item.dataset.page); });
         });
 
-        // Category filter
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.currentCategory = btn.dataset.category;
-                this.renderProducts();
-            });
-        });
-
         // POS
         document.getElementById('searchProduct').addEventListener('input', () => this.renderProducts());
         document.getElementById('clearCartBtn').addEventListener('click', () => this.clearCart());
@@ -74,6 +64,10 @@ class CoffeePOS {
         if (uploadPlaceholder) {
             uploadPlaceholder.addEventListener('click', () => document.getElementById('itemImageFile').click());
         }
+
+        // Categories (now accessed from Items page)
+        document.getElementById('manageCategoriesBtn').addEventListener('click', () => this.openCategoryManagement());
+        document.getElementById('categoryForm').addEventListener('submit', e => { e.preventDefault(); this.saveCategory(); });
 
         // Users
         document.getElementById('addUserBtn').addEventListener('click', () => this.openUserModal());
@@ -129,11 +123,11 @@ class CoffeePOS {
         document.getElementById(page + 'Page').classList.add('active');
 
         switch (page) {
-            case 'pos':     this.renderProducts();  break;
-            case 'items':   this.renderItems();     break;
-            case 'orders':  this.renderOrders();    break;
-            case 'reports': this.generateReports(); break;
-            case 'users':   this.renderUsers();     break;
+            case 'pos':        this.renderCategoryButtons(); this.renderProducts(); break;
+            case 'items':      this.renderItems();      break;
+            case 'orders':     this.renderOrders();     break;
+            case 'reports':    this.generateReports();  break;
+            case 'users':      this.renderUsers();      break;
         }
     }
 

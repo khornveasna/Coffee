@@ -111,7 +111,7 @@ CoffeePOS.prototype.exportOrders = function () {
         this.showToast('គ្មានទិន្នន័យសម្រាប់ Export', 'warning');
         return;
     }
-    let csv = 'ល.រ,លេខវិក័យបត្រ,កាលបរិច្ឆេទ,មុខម្ហូប,ចំនួន,សរុប,បញ្ចុះ,អ្នកបម្រើ\n';
+    let csv = 'ល.រ,លេខវិក័យបត្រ,កាលបរិច្ឆេទ,ភេសជ្ជៈ,ចំនួន,សរុប,បញ្ចុះ,អ្នកបម្រើ\n';
     orders.forEach((order, index) => {
         const items     = parseOrderItems(order.items);
         const itemCount = items.reduce((s, i) => s + i.quantity, 0);

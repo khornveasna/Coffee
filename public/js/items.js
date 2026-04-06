@@ -6,6 +6,27 @@ CoffeePOS.prototype.renderItems = function () {
     const filterCat   = document.getElementById('filterCategory').value;
     let   items       = this.data.products;
 
+    // Populate filter dropdown with categories
+    const filterSelect = document.getElementById('filterCategory');
+    const currentValue = filterSelect.value;
+    const categories = this.data.categories || [];
+    
+    // Only repopulate if categories changed or it's the first time
+    const existingOptions = Array.from(filterSelect.options).map(opt => opt.value);
+    const categoryIds = categories.map(cat => cat.id);
+    
+    if (existingOptions.length !== categoryIds.length + 1 || 
+        !categoryIds.every(id => existingOptions.includes(id))) {
+        filterSelect.innerHTML = '<option value="all">គ្រប់ប្រភេទ</option>';
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.name_km || cat.name;
+            filterSelect.appendChild(option);
+        });
+        filterSelect.value = currentValue; // Restore selected value
+    }
+
     if (filterCat !== 'all') items = items.filter(i => i.category === filterCat);
     if (searchTerm)          items = items.filter(i => i.name.toLowerCase().includes(searchTerm));
 
@@ -13,18 +34,23 @@ CoffeePOS.prototype.renderItems = function () {
         grid.innerHTML = `
             <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-light);">
                 <i class="fas fa-box-open" style="font-size:48px;margin-bottom:15px;opacity:0.3;"></i>
-                <p>គ្មានមុខម្ហូប</p>
+                <p>គ្មានភេសជ្ជៈ</p>
             </div>`;
         return;
     }
 
     grid.innerHTML = items.map(item => {
         const hasSale = item.salePrice && item.salePrice > 0;
+        // Get category name from data.categories
+        const categories = this.data.categories || [];
+        const category = categories.find(c => c.id === item.category);
+        const categoryName = category ? (category.name_km || category.name) : item.category;
+        
         return `
             <div class="item-card">
                 ${item.image ? `<img src="${item.image}" alt="${item.name}" class="item-card-image">` : `<div class="item-card-icon"><i class="fas ${item.icon}"></i></div>`}
                 <div class="item-card-body">
-                    <span class="category-tag">${categoryNames[item.category]}</span>
+                    <span class="category-tag">${categoryName}</span>
                     <h3>${item.name}</h3>
                     <div class="price-row">
                         ${hasSale
@@ -32,8 +58,8 @@ CoffeePOS.prototype.renderItems = function () {
                             : `<span class="price">${formatCurrency(item.price)}</span>`}
                     </div>
                     <div class="item-card-actions">
-                        <button class="btn-edit-item"   onclick="pos.openItemModal(${item.id})"><i class="fas fa-edit"></i> កែសម្រួល</button>
-                        <button class="btn-delete-item" onclick="pos.deleteItem(${item.id})"><i class="fas fa-trash"></i> លុប</button>
+                        <button class="btn-edit-item"   onclick="pos.openItemModal('${item.id}')"><i class="fas fa-edit"></i> កែសម្រួល</button>
+                        <button class="btn-delete-item" onclick="pos.deleteItem('${item.id}')"><i class="fas fa-trash"></i> លុប</button>
                     </div>
                 </div>
             </div>`;
@@ -46,11 +72,23 @@ CoffeePOS.prototype.openItemModal = function (itemId = null) {
     document.getElementById('imagePreview').innerHTML      = '';
     document.getElementById('uploadPlaceholder').style.display = 'block';
 
+    // Populate category dropdown
+    const categorySelect = document.getElementById('itemCategory');
+    const categories = this.data.categories || [];
+    categorySelect.innerHTML = '<option value="">ជ្រើសរើសប្រភេទ</option>';
+    categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.id;
+        option.textContent = cat.name_km || cat.name;
+        categorySelect.appendChild(option);
+    });
+
     if (itemId) {
-        const item = this.data.products.find(p => p.id === itemId);
+        const idStr = String(itemId);
+        const item = this.data.products.find(p => String(p.id) === idStr);
         if (item) {
             this.editingItem = item;
-            document.getElementById('itemModalTitle').innerHTML = '<i class="fas fa-edit"></i> កែសម្រួលមុខម្ហូប';
+            document.getElementById('itemModalTitle').innerHTML = '<i class="fas fa-edit"></i> កែសម្រួលភេសជ្ជៈ';
             document.getElementById('itemId').value          = item.id;
             document.getElementById('itemName').value        = item.name;
             document.getElementById('itemCategory').value    = item.category;
@@ -68,7 +106,7 @@ CoffeePOS.prototype.openItemModal = function (itemId = null) {
         }
     } else {
         this.editingItem = null;
-        document.getElementById('itemModalTitle').innerHTML = '<i class="fas fa-plus"></i> បន្ថែមមុខម្ហូប';
+        document.getElementById('itemModalTitle').innerHTML = '<i class="fas fa-plus"></i> បន្ថែមភេសជ្ជៈ';
         document.getElementById('itemId').value = '';
     }
     modal.classList.add('active');
@@ -107,14 +145,16 @@ CoffeePOS.prototype.saveItem = function () {
     const image       = document.getElementById('itemImage').value;
 
     if (id) {
-        const item = this.data.products.find(p => p.id === parseInt(id));
+        // Convert to string for consistent comparison
+        const idStr = String(id);
+        const item = this.data.products.find(p => String(p.id) === idStr);
         if (item) {
             Object.assign(item, { name, category, price, salePrice, description, active, image });
-            this.showToast('បានកែសម្រួលមុខម្ហូប!', 'success');
+            this.showToast('បានកែសម្រួលភេសជ្ជៈ!', 'success');
         }
     } else {
         this.data.products.push({ id: generateId(), name, category, price, salePrice, description, active, image, icon: categoryIcons[category] || 'fa-utensils' });
-        this.showToast('បានបន្ថែមមុខម្ហូប!', 'success');
+        this.showToast('បានបន្ថែមភេសជ្ជៈ!', 'success');
     }
 
     saveData(this.data);
@@ -123,10 +163,11 @@ CoffeePOS.prototype.saveItem = function () {
 };
 
 CoffeePOS.prototype.deleteItem = function (id) {
-    if (confirm('តើអ្នកចង់លុបមុខម្ហូបនេះទេ?')) {
-        this.data.products = this.data.products.filter(p => p.id !== id);
+    if (confirm('តើអ្នកចង់លុបភេសជ្ជៈនេះទេ?')) {
+        const idStr = String(id);
+        this.data.products = this.data.products.filter(p => String(p.id) !== idStr);
         saveData(this.data);
         this.renderItems();
-        this.showToast('បានលុបមុខម្ហូប!', 'success');
+        this.showToast('បានលុបភេសជ្ជៈ!', 'success');
     }
 };
