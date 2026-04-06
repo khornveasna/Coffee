@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt  = require('bcryptjs');
+const authMiddleware = require('../middleware/auth');
 
 module.exports = function authRoutes(db) {
     const router = express.Router();
@@ -7,6 +8,13 @@ module.exports = function authRoutes(db) {
     router.post('/login', (req, res) => {
         try {
             const { username, password } = req.body;
+
+            if (!username || !password) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Username and password are required' 
+                });
+            }
 
             const user = db.prepare('SELECT * FROM users WHERE username = ? AND active = 1').get(username);
             if (!user) {
@@ -22,8 +30,15 @@ module.exports = function authRoutes(db) {
                 permissions = ['pos', 'items', 'orders', 'reports', 'users'];
             }
 
-            const { password: _pwd, permissions: _perm, ...userWithoutPassword } = user;
-            res.json({ success: true, user: { ...userWithoutPassword, permissions } });
+            // Generate JWT token
+            const token = authMiddleware.generateToken(user);
+
+            const { password: _pwd, ...userWithoutPassword } = user;
+            res.json({ 
+                success: true, 
+                token,
+                user: { ...userWithoutPassword, permissions } 
+            });
         } catch (error) {
             console.error('Login error:', error);
             res.status(500).json({ success: false, message: 'Server error' });

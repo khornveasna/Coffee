@@ -1,8 +1,12 @@
 // Authentication: login, logout, checkAuth, showApp, permissions
 
 CoffeePOS.prototype.checkAuth = function () {
-    this.currentUser = getCurrentUser();
-    if (this.currentUser) {
+    const user = getCurrentUser();
+    const token = localStorage.getItem('coffeePOSToken');
+    
+    if (user && token) {
+        this.currentUser = user;
+        this.authToken = token;
         document.getElementById('currentUser').textContent = this.currentUser.fullname;
         if (this.currentUser.role === 'admin') {
             this.currentUser.permissions = ['pos', 'items', 'orders', 'reports', 'users'];
@@ -22,7 +26,7 @@ CoffeePOS.prototype.displayUserPermissions = function () {
 
     const icons = {
         pos:     '<i class="fas fa-cash-register" title="លក់"></i>',
-        items:   '<i class="fas fa-box"           title="គ្រប់គ្រងមុខម្ហូប"></i>',
+        items:   '<i class="fas fa-box"           title="គ្រប់គ្រងភេសជ្ជៈ"></i>',
         orders:  '<i class="fas fa-receipt"       title="មើលការលក់"></i>',
         reports: '<i class="fas fa-chart-line"    title="របាយការណ៍"></i>'
     };
@@ -67,6 +71,11 @@ CoffeePOS.prototype.login = async function () {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
+    if (!username || !password) {
+        this.showToast('សូមបញ្ចូលឈ្មោះអ្នកប្រើប្រាស់ និងពាក្យសម្ងាត់!', 'error');
+        return;
+    }
+
     try {
         const response = await fetch('/api/auth/login', {
             method:  'POST',
@@ -77,7 +86,12 @@ CoffeePOS.prototype.login = async function () {
 
         if (result.success) {
             this.currentUser = result.user;
+            this.authToken = result.token;
+            
+            // Store token and user
+            localStorage.setItem('coffeePOSToken', result.token);
             setCurrentUser(result.user);
+            
             document.getElementById('currentUser').textContent = result.user.fullname;
             this.showToast('ការចូលប្រើប្រាស់ជោគជ័យ!', 'success');
             this.showApp();
@@ -93,10 +107,40 @@ CoffeePOS.prototype.login = async function () {
 CoffeePOS.prototype.logout = function () {
     if (this.socket && this.currentUser) this.socket.emit('user-logout');
     this.currentUser = null;
+    this.authToken = null;
     setCurrentUser(null);
+    localStorage.removeItem('coffeePOSToken');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('appScreen').classList.add('hidden');
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
     this.showToast('បានចាកចេញ!', 'success');
+};
+
+// Helper function to make authenticated API requests
+CoffeePOS.prototype.apiRequest = async function(url, options = {}) {
+    const token = this.authToken || localStorage.getItem('coffeePOSToken');
+    
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(url, {
+        ...options,
+        headers
+    });
+    
+    // Handle 401 Unauthorized (token expired)
+    if (response.status === 401) {
+        this.showToast('សេសសិនផុតកំណត់! សូមចូលប្រើប្រាស់ម្តងទៀត!', 'error');
+        this.logout();
+        throw new Error('Token expired');
+    }
+    
+    return response.json();
 };

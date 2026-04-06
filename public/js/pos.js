@@ -1,5 +1,33 @@
 // POS: products grid, cart, checkout, print receipt
 
+CoffeePOS.prototype.renderCategoryButtons = function () {
+    const container = document.querySelector('.categories');
+    const categories = this.data.categories || [];
+    const currentCategory = this.currentCategory || 'all';
+    
+    let html = `<button class="category-btn ${currentCategory === 'all' ? 'active' : ''}" data-category="all">
+                    <i class="fas fa-th"></i> ទាំងអស់
+                </button>`;
+    
+    categories.forEach(cat => {
+        html += `<button class="category-btn ${currentCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">
+                    <i class="fas ${cat.icon || 'fa-box'}"></i> ${cat.name_km || cat.name}
+                </button>`;
+    });
+    
+    container.innerHTML = html;
+    
+    // Rebind events
+    container.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            container.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.currentCategory = btn.dataset.category;
+            this.renderProducts();
+        });
+    });
+};
+
 CoffeePOS.prototype.renderProducts = function () {
     const grid       = document.getElementById('productsGrid');
     const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
@@ -16,7 +44,7 @@ CoffeePOS.prototype.renderProducts = function () {
         grid.innerHTML = `
             <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-light);">
                 <i class="fas fa-search" style="font-size:48px;margin-bottom:15px;opacity:0.3;"></i>
-                <p>គ្មានមុខម្ហូបត្រូវនឹងការស្វែងរក</p>
+                <p>គ្មានភេសជ្ជៈត្រូវនឹងការស្វែងរក</p>
             </div>`;
         return;
     }
@@ -24,7 +52,7 @@ CoffeePOS.prototype.renderProducts = function () {
     grid.innerHTML = products.map(p => {
         const hasSale = p.salePrice && p.salePrice > 0;
         return `
-            <div class="product-card" data-id="${p.id}" onclick="pos.addToCart(${p.id})">
+            <div class="product-card" data-id="${p.id}" onclick="pos.addToCart('${p.id}')">
                 ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<div class="product-icon"><i class="fas ${p.icon}"></i></div>`}
                 <h3>${p.name}</h3>
                 ${hasSale
@@ -35,32 +63,56 @@ CoffeePOS.prototype.renderProducts = function () {
 };
 
 CoffeePOS.prototype.addToCart = function (productId) {
-    const product = this.data.products.find(p => p.id === productId);
-    if (!product) return;
-
-    const existing = this.cart.find(item => item.id === productId);
-    if (existing) {
-        existing.quantity++;
-    } else {
-        this.cart.push({
-            id:            product.id,
-            name:          product.name,
-            price:         product.salePrice && product.salePrice > 0 ? product.salePrice : product.price,
-            originalPrice: product.price,
-            quantity:      1,
-            image:         product.image,
-            icon:          product.icon
+    try {
+        console.log('🛒 addToCart called with ID:', productId);
+        
+        const idStr = String(productId);
+        console.log('📦 Available products:', this.data.products.length);
+        console.log('🔍 Looking for product ID:', idStr);
+        
+        const product = this.data.products.find(p => {
+            const match = String(p.id) === idStr;
+            if (match) console.log('✅ Found product:', p.name);
+            return match;
         });
+        
+        if (!product) {
+            console.error('❌ Product not found! ID:', idStr);
+            console.error('Available product IDs:', this.data.products.map(p => p.id));
+            this.showToast('រកមិនឃើញភេសជ្ជៈ!', 'error');
+            return;
+        }
+
+        const existing = this.cart.find(item => String(item.id) === idStr);
+        if (existing) {
+            existing.quantity++;
+            console.log('➕ Increased quantity for:', product.name);
+        } else {
+            this.cart.push({
+                id:            product.id,
+                name:          product.name,
+                price:         product.salePrice && product.salePrice > 0 ? product.salePrice : product.price,
+                originalPrice: product.price,
+                quantity:      1,
+                image:         product.image,
+                icon:          product.icon
+            });
+            console.log('🆕 Added to cart:', product.name);
+        }
+        
+        this.renderCart();
+        this.showToast(`បានបន្ថែម ${product.name} ចូលរទេះ!`, 'success');
+    } catch (error) {
+        console.error('❌ addToCart error:', error);
+        this.showToast('កំហុស: ' + error.message, 'error');
     }
-    this.renderCart();
-    this.showToast(`បានបន្ថែម ${product.name} ចូលរទេះ!`, 'success');
 };
 
 CoffeePOS.prototype.renderCart = function () {
     const cartItems = document.getElementById('cartItems');
 
     if (this.cart.length === 0) {
-        cartItems.innerHTML = `<div class="empty-cart"><i class="fas fa-shopping-cart"></i><p>គ្មានមុខម្ហូបក្នុងរទេះ</p></div>`;
+        cartItems.innerHTML = `<div class="empty-cart"><i class="fas fa-shopping-cart"></i><p>គ្មានភេសជ្ជៈក្នុងរទេះ</p></div>`;
         document.getElementById('checkoutBtn').disabled = true;
     } else {
         cartItems.innerHTML = this.cart.map((item, i) => `
@@ -168,12 +220,12 @@ CoffeePOS.prototype.confirmPayment = async function () {
     };
 
     try {
-        const response = await fetch('/api/orders', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify(order)
+        // Use apiRequest helper to include JWT token
+        const response = await this.apiRequest('/api/orders', {
+            method: 'POST',
+            body: JSON.stringify(order)
         });
-        const result = await response.json();
+        const result = response; // apiRequest already returns parsed JSON
 
         if (result.success) {
             this.printReceipt();

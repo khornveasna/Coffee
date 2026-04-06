@@ -21,7 +21,10 @@
       "Bash(netstat *)",
       "Bash(findstr *)",
       "Bash(tasklist)",
-      "Bash(type *)"
+      "Bash(type *)",
+      "Bash(powershell *)",
+      "Bash(json)",
+      "Bash(set *)"
     ]
   },
   "$version": 3

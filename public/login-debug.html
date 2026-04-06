@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Debug - Coffee POS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border-left: 4px solid #4CAF50;
+            white-space: pre-wrap;
+        }
+        .success { color: #4CAF50; font-weight: bold; }
+        .error { color: #f44336; font-weight: bold; }
+        .info { color: #2196F3; }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .step {
+            background: #e3f2fd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Login Debug Tool</h1>
+    
+    <div class="card">
+        <h2>Step 1: Check Server Connection</h2>
+        <button onclick="checkServer()">Check Server</button>
+        <pre id="serverResult">Click to check if server is reachable...</pre>
+    </div>
+
+    <div class="card">
+        <h2>Step 2: Test Login API</h2>
+        <label>Username:</label>
+        <input type="text" id="username" value="admin">
+        <label>Password:</label>
+        <input type="password" id="password" value="1234">
+        <button onclick="testLoginAPI()">Test Login API</button>
+        <pre id="loginAPIResult">Click to test login...</pre>
+    </div>
+
+    <div class="card">
+        <h2>Step 3: Check localStorage</h2>
+        <button onclick="checkStorage()">Check localStorage</button>
+        <button onclick="clearStorage()">Clear localStorage</button>
+        <pre id="storageResult">Click to check localStorage...</pre>
+    </div>
+
+    <div class="card">
+        <h2>Step 4: Simulate Login (Like Real App)</h2>
+        <button onclick="simulateLogin()">Simulate Login</button>
+        <pre id="simulateResult">Click to simulate login...</pre>
+    </div>
+
+    <div class="card">
+        <h2>Step 5: Console Logs</h2>
+        <button onclick="showConsoleLogs()">Show Console Logs</button>
+        <pre id="consoleResult">Click to view console logs...</pre>
+    </div>
+
+    <script>
+        // Intercept console.log
+        const originalLog = console.log;
+        const consoleLogs = [];
+        console.log = function(...args) {
+            consoleLogs.push(args.join(' '));
+            originalLog.apply(console, args);
+        };
+
+        async function checkServer() {
+            const resultEl = document.getElementById('serverResult');
+            try {
+                resultEl.innerHTML = '<span class="info">⏳ Checking server...</span>';
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                resultEl.innerHTML = `<span class="success">✅ Server is reachable!</span>\n\nResponse: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">❌ Server not reachable!</span>\n\nError: ${error.message}\n\nMake sure server is running on this port.`;
+            }
+        }
+
+        async function testLoginAPI() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultEl = document.getElementById('loginAPIResult');
+
+            try {
+                resultEl.innerHTML = '<span class="info">⏳ Sending login request...</span>';
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                resultEl.innerHTML = `Status: ${response.status}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+
+                if (data.success) {
+                    resultEl.innerHTML = `<span class="success">✅ Login API works!</span>\n\n${resultEl.innerHTML}`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">❌ Login API failed!</span>\n\nError: ${error.message}`;
+            }
+        }
+
+        function checkStorage() {
+            const resultEl = document.getElementById('storageResult');
+            const token = localStorage.getItem('coffeePOSToken');
+            const user = localStorage.getItem('coffeePOSUser');
+
+            let output = '=== localStorage Contents ===\n\n';
+            output += `coffeePOSToken: ${token ? token.substring(0, 50) + '...' : 'NOT SET'}\n\n`;
+            output += `coffeePOSUser: ${user || 'NOT SET'}\n\n`;
+            output += 'All localStorage items:\n';
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                output += `  ${key}: ${value.substring(0, 100)}\n`;
+            }
+
+            resultEl.innerHTML = output;
+        }
+
+        function clearStorage() {
+            localStorage.removeItem('coffeePOSToken');
+            localStorage.removeItem('coffeePOSUser');
+            document.getElementById('storageResult').innerHTML = '<span class="info">🗑️ localStorage cleared!</span>';
+        }
+
+        async function simulateLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultEl = document.getElementById('simulateResult');
+
+            try {
+                resultEl.innerHTML = '<span class="info">⏳ Simulating login process...</span>\n';
+
+                // Step 1: Check if form elements exist
+                resultEl.innerHTML += '\n1️⃣ Checking form elements...\n';
+                const usernameEl = document.getElementById('username');
+                const passwordEl = document.getElementById('password');
+                resultEl.innerHTML += `   Username field: ${usernameEl ? '✅ Found' : '❌ Not found'}\n`;
+                resultEl.innerHTML += `   Password field: ${passwordEl ? '✅ Found' : '❌ Not found'}\n`;
+
+                // Step 2: Get values
+                resultEl.innerHTML += '\n2️⃣ Getting values...\n';
+                resultEl.innerHTML += `   Username: ${username}\n`;
+                resultEl.innerHTML += `   Password: ${password}\n`;
+
+                // Step 3: Send request
+                resultEl.innerHTML += '\n3️⃣ Sending request...\n';
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                resultEl.innerHTML += `   Response status: ${response.status}\n`;
+
+                const result = await response.json();
+                resultEl.innerHTML += `   Response success: ${result.success}\n`;
+
+                if (result.success) {
+                    // Step 4: Store token
+                    resultEl.innerHTML += '\n4️⃣ Storing token...\n';
+                    localStorage.setItem('coffeePOSToken', result.token);
+                    localStorage.setItem('coffeePOSUser', JSON.stringify(result.user));
+                    resultEl.innerHTML += `   Token stored: ✅\n`;
+                    resultEl.innerHTML += `   User stored: ✅\n`;
+
+                    resultEl.innerHTML += '\n<span class="success">✅ Login simulation successful!</span>\n';
+                    resultEl.innerHTML += `\nYou can now try logging in through the main app.`;
+                } else {
+                    resultEl.innerHTML += `\n<span class="error">❌ Login failed!</span>\n`;
+                    resultEl.innerHTML += `Error: ${result.message}`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">❌ Simulation failed!</span>\n\nError: ${error.message}\n\nStack: ${error.stack}`;
+            }
+        }
+
+        function showConsoleLogs() {
+            const resultEl = document.getElementById('consoleResult');
+            if (consoleLogs.length === 0) {
+                resultEl.innerHTML = '<span class="info">No console logs captured yet. Try simulating login first.</span>';
+            } else {
+                resultEl.innerHTML = `Last ${consoleLogs.length} console log entries:\n\n${consoleLogs.slice(-20).join('\n')}`;
+            }
+        }
+
+        // Auto-check server on load
+        window.onload = function() {
+            checkServer();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Test - Coffee POS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        button.danger { background: #f44336; }
+        button.danger:hover { background: #da190b; }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border-left: 4px solid #4CAF50;
+        }
+        .success { color: #4CAF50; font-weight: bold; }
+        .error { color: #f44336; font-weight: bold; }
+        .info { color: #2196F3; }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Coffee POS Authentication Test</h1>
+    
+    <div class="card">
+        <h2>1. Login Test</h2>
+        <label>Username:</label>
+        <input type="text" id="username" value="admin">
+        <label>Password:</label>
+        <input type="password" id="password" value="1234">
+        <button onclick="testLogin()">Test Login</button>
+        <pre id="loginResult">Click "Test Login" to see results...</pre>
+    </div>
+
+    <div class="card">
+        <h2>2. Token Storage</h2>
+        <button onclick="showToken()">Show Token</button>
+        <button onclick="clearToken()" class="danger">Clear Token</button>
+        <pre id="tokenResult">Click "Show Token" to see stored token...</pre>
+    </div>
+
+    <div class="card">
+        <h2>3. Protected Route Test</h2>
+        <button onclick="testUsers()">Test GET /api/users</button>
+        <button onclick="testProducts()">Test GET /api/products</button>
+        <button onclick="testOrders()">Test GET /api/orders</button>
+        <pre id="protectedResult">Click a button to test a protected route...</pre>
+    </div>
+
+    <div class="card">
+        <h2>4. Health Check</h2>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <pre id="healthResult">Click to test health endpoint...</pre>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        async function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultEl = document.getElementById('loginResult');
+
+            try {
+                resultEl.innerHTML = '<span class="info">⏳ Sending login request...</span>';
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store token
+                    localStorage.setItem('coffeePOSToken', data.token);
+                    localStorage.setItem('coffeePOSUser', JSON.stringify(data.user));
+                    
+                    resultEl.innerHTML = `<span class="success">✅ Login Successful!</span>\n\nToken: ${data.token.substring(0, 50)}...\n\nUser: ${JSON.stringify(data.user, null, 2)}`;
+                } else {
+                    resultEl.innerHTML = `<span class="error">❌ Login Failed!</span>\n\n${data.message}`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">❌ Error!</span>\n\n${error.message}`;
+            }
+        }
+
+        function showToken() {
+            const token = localStorage.getItem('coffeePOSToken');
+            const user = localStorage.getItem('coffeePOSUser');
+            const resultEl = document.getElementById('tokenResult');
+
+            if (token) {
+                resultEl.innerHTML = `<span class="success">✅ Token Found</span>\n\nToken: ${token.substring(0, 100)}...\n\nUser: ${user}`;
+            } else {
+                resultEl.innerHTML = '<span class="error">❌ No token stored in localStorage</span>';
+            }
+        }
+
+        function clearToken() {
+            localStorage.removeItem('coffeePOSToken');
+            localStorage.removeItem('coffeePOSUser');
+            document.getElementById('tokenResult').innerHTML = '<span class="info">🗑️ Token cleared from localStorage</span>';
+        }
+
+        async function testUsers() {
+            await testProtectedRoute('/api/users', 'protectedResult');
+        }
+
+        async function testProducts() {
+            await testProtectedRoute('/api/products?page=1&limit=5', 'protectedResult');
+        }
+
+        async function testOrders() {
+            await testProtectedRoute('/api/orders?page=1&limit=5', 'protectedResult');
+        }
+
+        async function testProtectedRoute(url, resultId) {
+            const resultEl = document.getElementById(resultId);
+            const token = localStorage.getItem('coffeePOSToken');
+
+            if (!token) {
+                resultEl.innerHTML = '<span class="error">❌ No token found! Please login first.</span>';
+                return;
+            }
+
+            try {
+                resultEl.innerHTML = '<span class="info">⏳ Sending request with token...</span>';
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const preview = JSON.stringify(data, null, 2).substring(0, 500);
+                    resultEl.innerHTML = `<span class="success">✅ Success!</span>\n\nStatus: ${response.status}\n\nData Preview:\n${preview}${JSON.stringify(data).length > 500 ? '\n\n... (truncated)' : ''}`;
+                } else {
+                    resultEl.innerHTML = `<span class="error">❌ Request Failed</span>\n\nStatus: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">❌ Error!</span>\n\n${error.message}`;
+            }
+        }
+
+        async function testHealth() {
+            const resultEl = document.getElementById('healthResult');
+
+            try {
+                resultEl.innerHTML = '<span class="info">⏳ Checking health...</span>';
+                
+                const response = await fetch('/api/health');
+                const data = await response.json();
+
+                resultEl.innerHTML = `<span class="success">✅ Server is ${data.status}!</span>\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">❌ Error!</span>\n\n${error.message}`;
+            }
+        }
+
+        // Auto-load token on page load
+        window.onload = function() {
+            showToken();
+        };
+    </script>
+</body>
+</html>

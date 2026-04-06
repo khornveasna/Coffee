@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Click Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            border-left: 4px solid #4CAF50;
+        }
+        .product {
+            display: inline-block;
+            width: 150px;
+            padding: 15px;
+            margin: 10px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .product:hover {
+            border-color: #4CAF50;
+            background: #f0fff0;
+        }
+        .success { color: #4CAF50; font-weight: bold; }
+        .error { color: #f44336; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 POS Click Test</h1>
+        <p>This tests if clicking on products works</p>
+    </div>
+
+    <div class="card">
+        <h2>Products (Click to test):</h2>
+        <div id="productsList">Loading...</div>
+    </div>
+
+    <div class="card">
+        <h2>Cart:</h2>
+        <div id="cartList">Cart is empty</div>
+    </div>
+
+    <div class="card">
+        <h2>Debug Log:</h2>
+        <pre id="debugLog">Waiting for clicks...</pre>
+    </div>
+
+    <script>
+        const cart = [];
+        const log = [];
+        
+        function debug(msg) {
+            log.push(msg);
+            document.getElementById('debugLog').textContent = log.join('\n');
+            console.log(msg);
+        }
+
+        async function loadProducts() {
+            debug('📥 Loading products from API...');
+            try {
+                const token = localStorage.getItem('coffeePOSToken');
+                if (!token) {
+                    debug('❌ No token found! Please login first at http://localhost:3002');
+                    document.getElementById('productsList').innerHTML = '<p class="error">Please login first at <a href="/">http://localhost:3002</a></p>';
+                    return;
+                }
+
+                const response = await fetch('/api/products?page=1&limit=100', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    debug(`✅ Loaded ${data.products.length} products`);
+                    renderProducts(data.products);
+                } else {
+                    debug(`❌ Failed to load products: ${data.message}`);
+                }
+            } catch (error) {
+                debug(`❌ Error: ${error.message}`);
+            }
+        }
+
+        function renderProducts(products) {
+            const container = document.getElementById('productsList');
+            container.innerHTML = '';
+
+            products.forEach(product => {
+                const div = document.createElement('div');
+                div.className = 'product';
+                div.innerHTML = `
+                    <div style="font-size: 40px; margin-bottom: 10px;">☕</div>
+                    <div style="font-weight: bold;">${product.name}</div>
+                    <div style="color: #4CAF50; font-weight: bold;">${product.price.toLocaleString()}៛</div>
+                    <div style="font-size: 10px; color: #999; margin-top: 5px;">ID: ${product.id}</div>
+                `;
+                div.onclick = () => addToCart(product);
+                container.appendChild(div);
+            });
+        }
+
+        function addToCart(product) {
+            debug(`🛒 addToCart called for: ${product.name} (ID: ${product.id})`);
+            
+            const existing = cart.find(item => item.id === product.id);
+            if (existing) {
+                existing.quantity++;
+                debug(`➕ Increased quantity for ${product.name} to ${existing.quantity}`);
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1
+                });
+                debug(`🆕 Added ${product.name} to cart`);
+            }
+
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartList');
+            if (cart.length === 0) {
+                container.innerHTML = 'Cart is empty';
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div style="padding: 10px; margin: 5px 0; background: #f0fff0; border-left: 4px solid #4CAF50;">
+                    <strong>${item.name}</strong> x${item.quantity} = ${(item.price * item.quantity).toLocaleString()}៛
+                </div>
+            `).join('');
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            container.innerHTML += `<div style="margin-top: 10px; font-weight: bold; font-size: 18px;">Total: ${total.toLocaleString()}៛</div>`;
+        }
+
+        // Load products on page load
+        loadProducts();
+    </script>
+</body>
+</html>

@@ -395,6 +395,71 @@ body {
     font-size: 14px;
 }
 
+/* New date range filter styles */
+.date-range-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card-bg);
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+}
+
+.date-range-filter label {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.date-range-filter input[type="date"] {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.date-range-filter input[type="date"]:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Staff filter styles */
+.staff-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card-bg);
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+}
+
+.staff-filter label {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.staff-select {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.staff-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
 .report-period-title {
     background: var(--card-bg);
     padding: 15px 25px;
@@ -1388,6 +1453,27 @@ body {
 .upload-placeholder span {
     color: var(--text-light);
     font-size: 13px;
+}
+
+.icon-picker {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.icon-picker input[type="text"] {
+    flex: 1;
+}
+
+.icon-preview {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: 10px;
 }
 
 .image-preview {
@@ -2729,3 +2815,8 @@ body {
     }
     */
 }
+The string is missing the terminator: '@.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordEx 
+   ception
+    + FullyQualifiedErrorId : TerminatorExpectedAtEndOfString
+ 

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee POS - Final Diagnostic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .success { color: #4CAF50; font-weight: bold; }
+        .error { color: #f44336; font-weight: bold; }
+        .warning { color: #FF9800; font-weight: bold; }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .btn-blue { background: #2196F3; }
+        .btn-blue:hover { background: #1976D2; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔍 Coffee POS - Complete Diagnostic</h1>
+        <p>This will identify exactly why login isn't working</p>
+    </div>
+
+    <div class="card">
+        <h2>Diagnostics:</h2>
+        <pre id="results">Running diagnostics...</pre>
+    </div>
+
+    <div class="card">
+        <button onclick="location.href='/'" class="btn-blue">Go to Main App</button>
+        <button onclick="location.href='/simple-login-test.html'">Simple Login Test</button>
+        <button onclick="location.href='/js-diagnostic.html'">JavaScript Diagnostic</button>
+    </div>
+
+    <script>
+        const results = [];
+        
+        function log(msg, type = 'info') {
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '';
+            results.push(`${icon} ${msg}`);
+            document.getElementById('results').textContent = results.join('\n');
+            console.log(`${icon} ${msg}`);
+        }
+
+        async function diagnose() {
+            log('=== Coffee POS Complete Diagnostic ===');
+            log('');
+
+            // 1. Browser info
+            log('1️⃣ Browser Information');
+            log(`  User Agent: ${navigator.userAgent.substring(0, 80)}...`);
+            log(`  URL: ${window.location.href}`);
+            log(`  Port: ${window.location.port || (window.location.protocol === 'https:' ? '443' : '80')}`);
+            log('');
+
+            // 2. Test server connection
+            log('2️⃣ Server Connection Test');
+            try {
+                const resp = await fetch('/api/health');
+                const data = await resp.json();
+                log(`  Server: RUNNING on port ${window.location.port || '3002'}`, 'success');
+                log(`  Status: ${data.status}`, 'success');
+                log(`  Database: ${data.database}`, 'success');
+            } catch (e) {
+                log(`  Server: NOT REACHABLE`, 'error');
+                log(`  Error: ${e.message}`, 'error');
+            }
+            log('');
+
+            // 3. Test login API
+            log('3️⃣ Login API Test');
+            try {
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: 'admin', password: '1234'})
+                });
+                const data = await resp.json();
+                
+                if (data.success) {
+                    log(`  Login API: WORKING`, 'success');
+                    log(`  Token received: YES`, 'success');
+                    log(`  Token length: ${data.token.length} chars`, 'success');
+                } else {
+                    log(`  Login API: FAILED`, 'error');
+                    log(`  Error: ${data.message}`, 'error');
+                }
+            } catch (e) {
+                log(`  Login API: ERROR`, 'error');
+                log(`  ${e.message}`, 'error');
+            }
+            log('');
+
+            // 4. Check localStorage
+            log('4️⃣ localStorage Test');
+            try {
+                localStorage.setItem('test', 'works');
+                const test = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                if (test === 'works') {
+                    log(`  localStorage: WORKING`, 'success');
+                } else {
+                    log(`  localStorage: FAILED`, 'error');
+                }
+            } catch (e) {
+                log(`  localStorage: ERROR`, 'error');
+                log(`  ${e.message}`, 'error');
+            }
+            log('');
+
+            // 5. Check if CoffeePOS class can be created
+            log('5️⃣ CoffeePOS Class Test');
+            try {
+                // Load data.js
+                await loadScript('/js/data.js');
+                log(`  data.js: LOADED`, 'success');
+                
+                // Load app.js
+                await loadScript('/js/app.js');
+                log(`  app.js: LOADED`, 'success');
+                
+                // Check class
+                if (typeof CoffeePOS === 'function') {
+                    log(`  CoffeePOS class: DEFINED`, 'success');
+                    
+                    // Try to create instance
+                    try {
+                        const testPos = new CoffeePOS();
+                        log(`  CoffeePOS instance: CREATED`, 'success');
+                        log(`  Login form: SHOULD WORK`, 'success');
+                    } catch (e) {
+                        log(`  CoffeePOS instance: FAILED`, 'error');
+                        log(`  ${e.message}`, 'error');
+                        log(`  Stack: ${e.stack.substring(0, 200)}...`, 'error');
+                    }
+                } else {
+                    log(`  CoffeePOS class: NOT DEFINED`, 'error');
+                }
+            } catch (e) {
+                log(`  Script loading: FAILED`, 'error');
+                log(`  ${e.message}`, 'error');
+            }
+            log('');
+
+            // 6. Check form elements
+            log('6️⃣ Login Form Elements Test');
+            try {
+                const loginForm = document.getElementById('loginForm');
+                const usernameInput = document.getElementById('username');
+                const passwordInput = document.getElementById('password');
+                
+                if (loginForm) {
+                    log(`  loginForm: FOUND`, 'success');
+                } else {
+                    log(`  loginForm: NOT FOUND`, 'error');
+                }
+                
+                if (usernameInput) {
+                    log(`  username input: FOUND`, 'success');
+                } else {
+                    log(`  username input: NOT FOUND`, 'error');
+                }
+                
+                if (passwordInput) {
+                    log(`  password input: FOUND`, 'success');
+                } else {
+                    log(`  password input: NOT FOUND`, 'error');
+                }
+            } catch (e) {
+                log(`  Form elements: ERROR`, 'error');
+                log(`  ${e.message}`, 'error');
+            }
+            log('');
+
+            // 7. Final recommendation
+            log('7️⃣ Recommendation');
+            const allPassed = results.every(r => !r.includes('❌'));
+            
+            if (allPassed) {
+                log('');
+                log('🎉 ALL TESTS PASSED!', 'success');
+                log('');
+                log('💡 The app should work. Try these:', 'warning');
+                log('   1. Hard refresh: Ctrl+F5', 'info');
+                log('   2. Clear cache and reload', 'info');
+                log('   3. Try incognito/private mode', 'info');
+                log('   4. Check browser console (F12) for errors', 'info');
+            } else {
+                log('');
+                log('⚠️ SOME TESTS FAILED', 'warning');
+                log('');
+                log('🔧 Possible fixes:', 'warning');
+                log('   1. Restart the server: taskkill /F /IM node.exe && npm run dev', 'info');
+                log('   2. Clear browser cache (Ctrl+Shift+Delete)', 'info');
+                log('   3. Check if all JS files are in public/js/ folder', 'info');
+                log('   4. Open browser console (F12) and share any errors', 'info');
+            }
+        }
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // Run diagnostics
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(diagnose, 100);
+        });
+    </script>
+</body>
+</html>

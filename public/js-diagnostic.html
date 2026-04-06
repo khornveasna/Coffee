@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee POS - JavaScript Diagnostic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .success { color: #4CAF50; font-weight: bold; }
+        .error { color: #f44336; font-weight: bold; }
+        .warning { color: #FF9800; font-weight: bold; }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            border-left: 4px solid #2196F3;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔍 Coffee POS JavaScript Diagnostic</h1>
+        <p>This page checks if all JavaScript files are loading correctly</p>
+    </div>
+
+    <div class="card">
+        <h2>Test Results:</h2>
+        <pre id="results">Running tests...</pre>
+    </div>
+
+    <div class="card">
+        <button onclick="location.href='/'">Go to Main App</button>
+        <button onclick="location.href='/simple-login-test.html'">Simple Login Test</button>
+    </div>
+
+    <script>
+        const results = [];
+        
+        function log(message, type = 'info') {
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            results.push(`${icon} ${message}`);
+            document.getElementById('results').textContent = results.join('\n');
+        }
+
+        async function runTests() {
+            log('=== Coffee POS JavaScript Diagnostic ===');
+            log('');
+
+            // Test 1: Check if basic JavaScript works
+            log('Test 1: Basic JavaScript execution');
+            try {
+                const test = 'JavaScript works!';
+                log(`  ${test}`, 'success');
+            } catch (e) {
+                log(`  JavaScript failed: ${e.message}`, 'error');
+            }
+
+            // Test 2: Check if fetch API works
+            log('');
+            log('Test 2: Fetch API availability');
+            try {
+                if (typeof fetch !== 'undefined') {
+                    log('  fetch API is available', 'success');
+                } else {
+                    log('  fetch API is NOT available', 'error');
+                }
+            } catch (e) {
+                log(`  Error: ${e.message}`, 'error');
+            }
+
+            // Test 3: Check server connection
+            log('');
+            log('Test 3: Server connection');
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                log(`  Server status: ${data.status}`, 'success');
+                log(`  Database: ${data.database}`, 'success');
+                log(`  Environment: ${data.environment}`, 'info');
+            } catch (e) {
+                log(`  Server connection failed: ${e.message}`, 'error');
+            }
+
+            // Test 4: Check if CoffeePOS class exists
+            log('');
+            log('Test 4: CoffeePOS class loading');
+            try {
+                // Try to load app.js
+                const script = document.createElement('script');
+                script.src = '/js/data.js';
+                script.onload = function() {
+                    log('  ✅ data.js loaded successfully', 'success');
+                    
+                    // Now load app.js
+                    const appScript = document.createElement('script');
+                    appScript.src = '/js/app.js';
+                    appScript.onload = function() {
+                        log('  ✅ app.js loaded successfully', 'success');
+                        
+                        // Check if CoffeePOS class exists
+                        if (typeof CoffeePOS !== 'undefined') {
+                            log('  ✅ CoffeePOS class is defined', 'success');
+                            
+                            // Try to create instance
+                            try {
+                                const testPos = new CoffeePOS();
+                                log('  ✅ CoffeePOS instance created successfully', 'success');
+                                log('  ✅ Login form should work now!', 'success');
+                                log('');
+                                log('🎉 ALL TESTS PASSED! Go to main app and try logging in.', 'success');
+                            } catch (e) {
+                                log(`  ❌ CoffeePOS instance creation failed: ${e.message}`, 'error');
+                                log(`  Stack: ${e.stack}`, 'error');
+                            }
+                        } else {
+                            log('  ❌ CoffeePOS class is NOT defined', 'error');
+                        }
+                        
+                        // Load remaining scripts
+                        loadRemainingScripts();
+                    };
+                    appScript.onerror = function() {
+                        log('  ❌ app.js failed to load', 'error');
+                    };
+                    document.head.appendChild(appScript);
+                };
+                script.onerror = function() {
+                    log('  ❌ data.js failed to load', 'error');
+                };
+                document.head.appendChild(script);
+            } catch (e) {
+                log(`  Error loading scripts: ${e.message}`, 'error');
+            }
+        }
+
+        function loadRemainingScripts() {
+            log('');
+            log('Test 5: Loading remaining JavaScript files');
+            
+            const scripts = [
+                '/js/auth.js',
+                '/js/socket.js',
+                '/js/pos.js',
+                '/js/items.js',
+                '/js/categories.js',
+                '/js/orders.js',
+                '/js/reports.js',
+                '/js/users.js'
+            ];
+
+            let loaded = 0;
+            scripts.forEach((src, index) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = function() {
+                    loaded++;
+                    log(`  ✅ ${src.split('/').pop()} loaded`, 'success');
+                    
+                    if (loaded === scripts.length) {
+                        log('');
+                        log('🎊 All JavaScript files loaded successfully!', 'success');
+                        log('');
+                        log('💡 TIP: Now go to the main app and try logging in', 'warning');
+                    }
+                };
+                script.onerror = function() {
+                    loaded++;
+                    log(`  ❌ ${src.split('/').pop()} failed to load`, 'error');
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Run tests when page loads
+        window.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+// Complete reset script for Coffee POS
+// This will clear all localStorage and help you start fresh
+
+console.log('=== Coffee POS Reset Tool ===\n');
+
+// Clear localStorage
+console.log('1️⃣ Clearing localStorage...');
+localStorage.clear();
+console.log('✅ localStorage cleared!\n');
+
+// Clear any cached data
+console.log('2️⃣ Clearing service workers...');
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.unregister();
+        }
+    });
+}
+console.log('✅ Service workers cleared!\n');
+
+console.log('3️⃣ Reloading page...');
+setTimeout(() => {
+    location.reload();
+}, 1000);
+
+console.log('\n=== Reset Complete! ===');
+console.log('Try logging in again with:');
+console.log('  Username: admin');
+console.log('  Password: 1234');

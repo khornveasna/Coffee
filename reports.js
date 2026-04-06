@@ -30,6 +30,59 @@ CoffeePOS.prototype.generateReports = async function () {
         endDate.setHours(23, 59, 59, 999);
         periodLabel = 'ថ្ងៃនេះ';
     }
+        case 'lastWeek': {
+            const lastWeekDay = now.getDay() || 7;
+            startDate.setDate(now.getDate() - lastWeekDay - 6);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setDate(now.getDate() - lastWeekDay);
+            endDate.setHours(23, 59, 59, 999);
+            periodLabel = 'សប្តាហ៍មុន';
+            break;
+        }
+        case 'month':
+            startDate.setDate(1);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+            periodLabel = 'ខែនេះ';
+            break;
+        case 'lastMonth':
+            startDate.setMonth(now.getMonth() - 1);
+            startDate.setDate(1);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setMonth(now.getMonth() - 1);
+            endDate.setDate(0);
+            endDate.setHours(23, 59, 59, 999);
+            periodLabel = 'ខែមុន';
+            break;
+        case 'year':
+            startDate.setMonth(0, 1);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+            periodLabel = 'ឆ្នាំនេះ';
+            break;
+        case 'lastYear':
+            startDate.setFullYear(now.getFullYear() - 1);
+            startDate.setMonth(0, 1);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setFullYear(now.getFullYear() - 1);
+            endDate.setMonth(11, 31);
+            endDate.setHours(23, 59, 59, 999);
+            periodLabel = 'ឆ្នាំមុន';
+            break;
+        case 'custom': {
+            const customStart = document.getElementById('customStartDate').value;
+            const customEnd   = document.getElementById('customEndDate').value;
+            if (customStart) { startDate = new Date(customStart); startDate.setHours(0, 0, 0, 0); }
+            if (customEnd)   { endDate   = new Date(customEnd);   endDate.setHours(23, 59, 59, 999); }
+            else             { endDate   = new Date();             endDate.setHours(23, 59, 59, 999); }
+            periodLabel = 'កំណត់ដោយខ្លួនឯង';
+            break;
+        }
+        default:
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+            periodLabel = 'ថ្ងៃនេះ';
+    }
 
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr   = endDate.toISOString().split('T')[0];
@@ -50,11 +103,6 @@ CoffeePOS.prototype.generateReports = async function () {
 
         document.getElementById('reportPeriodTitle').innerHTML =
             `<i class="fas fa-calendar-alt"></i><span>រយៈពេល: ${periodLabel}</span>`;
-        
-        // Update top products title with date range
-        document.getElementById('topProductsTitle').innerHTML = 
-            `<i class="fas fa-trophy"></i> ភេសជ្ជៈលក់ដាច់ 5 មុខ (${periodLabel})`;
-        
         document.getElementById('totalRevenue').textContent   = formatCurrency(stats.totalRevenue);
         document.getElementById('totalOrders').textContent    = stats.totalOrders;
         document.getElementById('topProduct').textContent     = stats.topProduct || '-';
@@ -103,7 +151,7 @@ CoffeePOS.prototype.loadTopProducts = async function (startDate, endDate) {
 
         const container = document.getElementById('topProductsList');
         if (topProducts.length === 0) {
-            container.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px;">គ្មានទិន្ននយ</p>';
+            container.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:20px;">គ្មានទិន្នន័យ</p>';
             return;
         }
         container.innerHTML = topProducts.map(([name, qty], index) => `

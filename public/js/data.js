@@ -11,6 +11,10 @@ const defaultData = {
         { id: 7, name: 'តែបៃតងទឹកដោះគោ', category: 'tea',    price: 9000,  salePrice: 0,     image: '', icon: 'fa-leaf',    description: 'តែបៃតងទឹកដោះគោ',        active: true },
         { id: 8, name: 'តែបៃតងត្រជាក់',   category: 'tea',    price: 7500,  salePrice: 0,     image: '', icon: 'fa-leaf',    description: 'តែបៃតងត្រជាក់',          active: true }
     ],
+    categories: [
+        { id: 'coffee', name: 'coffee', name_km: 'កាហ្វេ', icon: 'fa-coffee' },
+        { id: 'tea', name: 'tea', name_km: 'តែបៃតង', icon: 'fa-leaf' }
+    ],
     users: [
         { id: 1, username: 'admin',   password: '1234', fullname: 'អ្នកគ្រប់គ្រង',    role: 'admin',   permissions: ['pos', 'items', 'orders', 'reports', 'users'], createdAt: new Date().toISOString() },
         { id: 2, username: 'manager', password: '1234', fullname: 'អ្នកគ្រប់គ្រងរង', role: 'manager', permissions: ['pos', 'items', 'orders', 'reports'],          createdAt: new Date().toISOString() },

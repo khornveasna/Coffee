@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick POS Test</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        pre { background: #f8f8f8; padding: 15px; border-radius: 4px; white-space: pre-wrap; border-left: 4px solid #4CAF50; }
+        .product { display: inline-block; width: 120px; padding: 15px; margin: 10px; background: white; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; }
+        .product:hover { border-color: #4CAF50; background: #f0fff0; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #45a049; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 Quick POS Click Test</h1>
+        <button onclick="testPos()">Test 1: Check pos object</button>
+        <button onclick="testProducts()">Test 2: Check products</button>
+        <button onclick="testClick()">Test 3: Simulate click</button>
+        <pre id="result">Click a button to test...</pre>
+    </div>
+
+    <div class="card">
+        <h2>Product Grid:</h2>
+        <div id="productGrid"></div>
+    </div>
+
+    <script>
+        function log(msg) {
+            document.getElementById('result').textContent += '\n' + msg;
+            console.log(msg);
+        }
+
+        function testPos() {
+            document.getElementById('result').textContent = '';
+            log('=== Test 1: Checking pos object ===\n');
+            
+            log(`typeof window.pos: ${typeof window.pos}`);
+            log(`typeof pos: ${typeof pos}`);
+            log(`typeof CoffeePOS: ${typeof CoffeePOS}`);
+            
+            if (typeof pos !== 'undefined') {
+                log(`✅ pos object exists!`);
+                log(`pos.currentUser: ${pos.currentUser ? 'EXISTS' : 'NULL'}`);
+                log(`pos.data.products: ${pos.data.products ? pos.data.products.length + ' products' : 'MISSING'}`);
+                log(`pos.addToCart: ${typeof pos.addToCart}`);
+                
+                if (pos.data.products && pos.data.products.length > 0) {
+                    log(`\nFirst product:`);
+                    log(`  ID: ${pos.data.products[0].id}`);
+                    log(`  Name: ${pos.data.products[0].name}`);
+                    log(`  Category: ${pos.data.products[0].category}`);
+                }
+            } else {
+                log(`❌ pos object NOT found!`);
+                log(`This is the problem - pos is not accessible globally`);
+            }
+        }
+
+        function testProducts() {
+            document.getElementById('result').textContent = '';
+            log('=== Test 2: Checking products data ===\n');
+            
+            if (typeof pos === 'undefined') {
+                log('❌ pos object not available');
+                return;
+            }
+            
+            log(`Total products: ${pos.data.products.length}`);
+            log('\nAll products:');
+            pos.data.products.forEach((p, i) => {
+                log(`  ${i+1}. ${p.name} (ID: ${p.id}, Category: ${p.category})`);
+            });
+        }
+
+        function testClick() {
+            document.getElementById('result').textContent = '';
+            log('=== Test 3: Simulating product click ===\n');
+            
+            if (typeof pos === 'undefined') {
+                log('❌ pos object not available');
+                return;
+            }
+            
+            if (pos.data.products.length === 0) {
+                log('❌ No products available');
+                return;
+            }
+            
+            const firstProduct = pos.data.products[0];
+            log(`Attempting to add: ${firstProduct.name}`);
+            log(`Product ID: ${firstProduct.id}`);
+            
+            try {
+                pos.addToCart(firstProduct.id);
+                log('✅ addToCart executed successfully');
+                log(`Cart now has ${pos.cart.length} items`);
+                if (pos.cart.length > 0) {
+                    log(`Cart contents:`);
+                    pos.cart.forEach((item, i) => {
+                        log(`  ${i+1}. ${item.name} x${item.quantity}`);
+                    });
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+                log(`Stack: ${error.stack}`);
+            }
+        }
+
+        // Render product grid
+        window.onload = async function() {
+            if (typeof pos !== 'undefined') {
+                const grid = document.getElementById('productGrid');
+                pos.data.products.forEach(product => {
+                    const div = document.createElement('div');
+                    div.className = 'product';
+                    div.innerHTML = `
+                        <div style="font-size: 40px;">☕</div>
+                        <div style="font-weight: bold; margin: 10px 0;">${product.name}</div>
+                        <div style="color: #4CAF50;">${product.price}៛</div>
+                    `;
+                    div.onclick = function() {
+                        alert(`Clicked: ${product.name}\nID: ${product.id}`);
+                        log(`Clicked: ${product.name} (ID: ${product.id})`);
+                    };
+                    grid.appendChild(div);
+                });
+            } else {
+                document.getElementById('productGrid').innerHTML = '<p>pos object not loaded</p>';
+            }
+        };
+    </script>
+</body>
+</html>

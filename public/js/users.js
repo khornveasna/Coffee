@@ -10,9 +10,8 @@ CoffeePOS.prototype.renderUsers = async function () {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;">កំពុងទាញយកទិន្នន័យ...</td></tr>';
 
     try {
-        const result = await fetch(
-            `/api/users?userId=${this.currentUser.id}&userRole=${this.currentUser.role}`
-        ).then(r => r.json());
+        // Use apiRequest helper to include JWT token
+        const result = await this.apiRequest('/api/users?page=1&limit=50');
 
         if (!result.success) {
             tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-light);">${result.message || 'មិនអាចទាញយកទិន្នន័យបានទេ!'}</td></tr>`;
@@ -141,15 +140,13 @@ CoffeePOS.prototype.saveUser = async function () {
     try {
         let result;
         if (id) {
-            const res = await fetch(`/api/users/${id}`, {
+            // Update user - use apiRequest to include JWT token
+            const res = await this.apiRequest(`/api/users/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     username, fullname,
                     password: password || undefined,
-                    role, permissions, active: true,
-                    userId: this.currentUser.id,
-                    userRole: this.currentUser.role
+                    role, permissions, active: true
                 })
             });
             result = await res.json();
@@ -172,13 +169,11 @@ CoffeePOS.prototype.saveUser = async function () {
                 return;
             }
         } else {
-            const res = await fetch('/api/users', {
+            // Create user - use apiRequest to include JWT token
+            const res = await this.apiRequest('/api/users', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username, password, fullname, role, permissions,
-                    userId: this.currentUser.id,
-                    userRole: this.currentUser.role
+                    username, password, fullname, role, permissions
                 })
             });
             result = await res.json();
@@ -214,10 +209,8 @@ CoffeePOS.prototype.deleteUser = async function (id) {
     if (!confirm('តើអ្នកចង់លុបអ្នកប្រើប្រាស់នេះទេ?')) return;
 
     try {
-        const result = await fetch(
-            `/api/users/${id}?userId=${this.currentUser.id}&userRole=${this.currentUser.role}`,
-            { method: 'DELETE' }
-        ).then(r => r.json());
+        // Delete user - use apiRequest to include JWT token
+        const result = await this.apiRequest(`/api/users/${id}`, { method: 'DELETE' });
 
         if (result.success) {
             this.data.users = this.data.users.filter(u => u.id !== id);

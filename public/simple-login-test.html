@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test - Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-top: 0; }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background: #45a049; }
+        button:active { background: #3d8b40; }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #4CAF50; font-weight: bold; }
+        .error { color: #f44336; font-weight: bold; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔐 Simple Login Test</h1>
+        <p>This tests the exact same login process as the main app</p>
+        
+        <form id="testLoginForm">
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="username" value="admin" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" value="1234" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        
+        <div id="result">Click "Login" button to test...</div>
+        
+        <button onclick="clearResult()" style="background: #f44336; margin-top: 10px;">Clear Result</button>
+        <button onclick="goToApp()" style="background: #2196F3; margin-top: 10px;">Go to Main App</button>
+    </div>
+
+    <script>
+        const resultEl = document.getElementById('result');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            resultEl.innerHTML += `\n[${timestamp}] ${prefix} ${message}`;
+            resultEl.scrollTop = resultEl.scrollHeight;
+        }
+        
+        function clearResult() {
+            resultEl.innerHTML = '';
+        }
+        
+        function goToApp() {
+            window.location.href = '/';
+        }
+        
+        document.getElementById('testLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            resultEl.innerHTML = '';
+            log('Starting login process...', 'info');
+            log(`Username: ${username}`, 'info');
+            log(`Password: ${'*'.repeat(password.length)}`, 'info');
+            
+            try {
+                // Step 1: Send request
+                log('Sending POST request to /api/auth/login...', 'info');
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                log(`Response status: ${response.status}`, response.ok ? 'success' : 'error');
+                log(`Response headers:`, 'info');
+                for (let [key, value] of response.headers.entries()) {
+                    log(`  ${key}: ${value}`, 'info');
+                }
+                
+                // Step 2: Parse response
+                log('Parsing JSON response...', 'info');
+                const result = await response.json();
+                
+                log('Response body:', 'info');
+                log(JSON.stringify(result, null, 2), 'info');
+                
+                // Step 3: Check if successful
+                if (result.success) {
+                    log('========================================', 'info');
+                    log('LOGIN SUCCESSFUL!', 'success');
+                    log('========================================', 'info');
+                    
+                    // Store token
+                    log('Storing token in localStorage...', 'info');
+                    localStorage.setItem('coffeePOSToken', result.token);
+                    localStorage.setItem('coffeePOSUser', JSON.stringify(result.user));
+                    log('Token stored successfully!', 'success');
+                    log(`Token: ${result.token.substring(0, 50)}...`, 'info');
+                    
+                    log('Storing user data...', 'info');
+                    log(`User: ${result.user.username} (${result.user.role})`, 'success');
+                    log(`Permissions: ${result.user.permissions.join(', ')}`, 'info');
+                    
+                    log('========================================', 'info');
+                    log('You can now go to the main app!', 'success');
+                    log('Click "Go to Main App" button below', 'info');
+                    
+                } else {
+                    log('========================================', 'error');
+                    log('LOGIN FAILED!', 'error');
+                    log('========================================', 'error');
+                    log(`Error: ${result.message || 'Unknown error'}`, 'error');
+                }
+                
+            } catch (error) {
+                log('========================================', 'error');
+                log('REQUEST FAILED!', 'error');
+                log('========================================', 'error');
+                log(`Error: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+                log('\nMake sure the server is running!', 'error');
+            }
+        });
+        
+        // Initial check
+        log('=== Login Test Page Ready ===', 'info');
+        log('Click "Login" button to test...', 'info');
+        log('\nChecking server connection...', 'info');
+        
+        fetch('/api/health')
+            .then(res => res.json())
+            .then(data => {
+                log(`Server status: ${data.status}`, 'success');
+                log(`Database: ${data.database}`, 'success');
+            })
+            .catch(err => {
+                log(`Server not reachable: ${err.message}`, 'error');
+            });
+    </script>
+</body>
+</html>

@@ -16,11 +16,68 @@ class CoffeePOS {
         this.init();
     }
 
-    init() {
-        this.initSocket();
+    async init() {
+        await this.initSocket();
         this.checkAuth();
         this.bindEvents();
-        if (this.currentUser) this.showApp();
+        
+        // Load data from API if user is logged in
+        if (this.currentUser) {
+            await this.loadDataFromAPI();
+            this.showApp();
+        }
+    }
+
+    // Load all data from API instead of localStorage
+    async loadDataFromAPI() {
+        try {
+            console.log('📥 Loading data from API...');
+
+            // Load products and transform to match frontend structure
+            const productsResult = await this.apiRequest('/api/products?page=1&limit=1000');
+            if (productsResult.success) {
+                // Transform API response to match frontend structure
+                this.data.products = productsResult.products.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    name_km: p.name_km,
+                    category: p.category_id, // Map category_id to category
+                    price: p.price,
+                    salePrice: p.salePrice,
+                    image: p.image,
+                    icon: p.icon,
+                    description: p.description,
+                    active: p.active
+                }));
+                console.log(`✅ Loaded ${productsResult.products.length} products`);
+            }
+
+            // Load categories
+            const categoriesResult = await this.apiRequest('/api/categories');
+            if (categoriesResult.success) {
+                this.data.categories = categoriesResult.categories;
+                console.log(`✅ Loaded ${categoriesResult.categories.length} categories`);
+            }
+
+            // Load orders (for orders page)
+            const ordersResult = await this.apiRequest('/api/orders?page=1&limit=100');
+            if (ordersResult.success) {
+                this.data.orders = ordersResult.orders;
+                console.log(`✅ Loaded ${ordersResult.orders.length} orders`);
+            }
+
+            // Load settings
+            const settingsResult = await this.apiRequest('/api/settings');
+            if (settingsResult.success) {
+                this.data.settings = settingsResult.settings;
+                console.log('✅ Loaded settings');
+            }
+
+            console.log('🎉 All data loaded from API successfully!');
+        } catch (error) {
+            console.error('❌ Error loading data from API:', error);
+            this.showToast('កំហុសក្នុងការទាញយកទិន្នន័យ!', 'error');
+        }
     }
 
     bindEvents() {
@@ -31,16 +88,6 @@ class CoffeePOS {
         // Navigation
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', e => { e.preventDefault(); this.navigate(item.dataset.page); });
-        });
-
-        // Category filter
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.currentCategory = btn.dataset.category;
-                this.renderProducts();
-            });
         });
 
         // POS
@@ -75,28 +122,25 @@ class CoffeePOS {
             uploadPlaceholder.addEventListener('click', () => document.getElementById('itemImageFile').click());
         }
 
+        // Categories (now accessed from Items page)
+        document.getElementById('manageCategoriesBtn').addEventListener('click', () => this.openCategoryManagement());
+        document.getElementById('categoryForm').addEventListener('submit', e => { e.preventDefault(); this.saveCategory(); });
+
         // Users
         document.getElementById('addUserBtn').addEventListener('click', () => this.openUserModal());
         document.getElementById('userForm').addEventListener('submit', e => { e.preventDefault(); this.saveUser(); });
 
         // Orders
-        document.getElementById('orderDateFilter').addEventListener('change', () => this.renderOrders());
+        document.getElementById('orderStartDate').addEventListener('change', () => this.renderOrders());
+        document.getElementById('orderEndDate').addEventListener('change', () => this.renderOrders());
+        document.getElementById('orderStaffFilter').addEventListener('change', () => this.renderOrders());
         document.getElementById('exportOrdersBtn').addEventListener('click', () => this.exportOrders());
         document.getElementById('printOrderBtn').addEventListener('click', () => this.printOrder());
 
         // Reports
         document.getElementById('generateReportBtn').addEventListener('click', () => this.generateReports());
-        document.getElementById('reportPeriod').addEventListener('change', () => {
-            const customRange = document.getElementById('customDateRange');
-            if (document.getElementById('reportPeriod').value === 'custom') {
-                customRange.classList.remove('hidden');
-            } else {
-                customRange.classList.add('hidden');
-            }
-            this.generateReports();
-        });
-        document.getElementById('customStartDate').addEventListener('change', () => this.generateReports());
-        document.getElementById('customEndDate').addEventListener('change', () => this.generateReports());
+        document.getElementById('reportStartDate').addEventListener('change', () => this.generateReports());
+        document.getElementById('reportEndDate').addEventListener('change', () => this.generateReports());
 
         // Modals
         document.querySelectorAll('.modal-close').forEach(btn => {
@@ -129,11 +173,11 @@ class CoffeePOS {
         document.getElementById(page + 'Page').classList.add('active');
 
         switch (page) {
-            case 'pos':     this.renderProducts();  break;
-            case 'items':   this.renderItems();     break;
-            case 'orders':  this.renderOrders();    break;
-            case 'reports': this.generateReports(); break;
-            case 'users':   this.renderUsers();     break;
+            case 'pos':        this.renderCategoryButtons(); this.renderProducts(); break;
+            case 'items':      this.renderItems();      break;
+            case 'orders':     this.renderOrders();     break;
+            case 'reports':    this.generateReports();  break;
+            case 'users':      this.renderUsers();      break;
         }
     }
 
