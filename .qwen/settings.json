@@ -22,9 +22,18 @@
       "Bash(findstr *)",
       "Bash(tasklist)",
       "Bash(type *)",
+<<<<<<< HEAD
       "Bash(powershell *)",
       "Bash(json)",
       "Bash(set *)"
+=======
+<<<<<<< HEAD
+      "Bash(powershell *)"
+=======
+      "Bash(dir *)",
+      "Bash(cmd *)"
+>>>>>>> dd573f73c311152001f64a382ab8bc4a05f7e596
+>>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
     ]
   },
   "$version": 3

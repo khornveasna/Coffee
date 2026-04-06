@@ -63,6 +63,7 @@ CoffeePOS.prototype.renderProducts = function () {
 };
 
 CoffeePOS.prototype.addToCart = function (productId) {
+<<<<<<< HEAD
     try {
         console.log('🛒 addToCart called with ID:', productId);
         
@@ -74,6 +75,24 @@ CoffeePOS.prototype.addToCart = function (productId) {
             const match = String(p.id) === idStr;
             if (match) console.log('✅ Found product:', p.name);
             return match;
+=======
+    const idStr = String(productId);
+    const product = this.data.products.find(p => String(p.id) === idStr);
+    if (!product) return;
+
+    const existing = this.cart.find(item => String(item.id) === idStr);
+    if (existing) {
+        existing.quantity++;
+    } else {
+        this.cart.push({
+            id:            product.id,
+            name:          product.name,
+            price:         product.salePrice && product.salePrice > 0 ? product.salePrice : product.price,
+            originalPrice: product.price,
+            quantity:      1,
+            image:         product.image,
+            icon:          product.icon
+>>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
         });
         
         if (!product) {

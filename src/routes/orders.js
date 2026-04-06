@@ -1,3 +1,32 @@
+<<<<<<< HEAD
+// Order Routes
+const express = require('express');
+const router = express.Router();
+const orderController = require('../controllers/orderController');
+const socketService = require('../services/socket');
+
+// Middleware to attach broadcast function to request
+router.use((req, res, next) => {
+    req.broadcast = (event, data) => {
+        socketService.broadcast(event, data);
+    };
+    next();
+});
+
+// GET /api/orders - Get all orders
+router.get('/', orderController.getAllOrders);
+
+// GET /api/orders/:id - Get specific order
+router.get('/:id', orderController.getOrder);
+
+// POST /api/orders - Create new order
+router.post('/', orderController.createOrder);
+
+// DELETE /api/orders/:id - Delete order
+router.delete('/:id', orderController.deleteOrder);
+
+module.exports = router;
+=======
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const authMiddleware = require('../middleware/auth');
@@ -185,3 +214,4 @@ module.exports = function ordersRoutes(db, broadcast) {
 
     return router;
 };
+>>>>>>> acbaef74e4deb37ef63c984d184b45dcbd99c93d

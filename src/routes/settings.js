@@ -1,3 +1,17 @@
+<<<<<<< HEAD
+// Settings Routes
+const express = require('express');
+const router = express.Router();
+const settingsController = require('../controllers/settingsController');
+
+// GET /api/settings - Get all settings
+router.get('/', settingsController.getSettings);
+
+// PUT /api/settings - Update settings
+router.put('/', settingsController.updateSettings);
+
+module.exports = router;
+=======
 const express = require('express');
 const authMiddleware = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
@@ -61,3 +75,4 @@ module.exports = function settingsRoutes(db) {
 
     return router;
 };
+>>>>>>> acbaef74e4deb37ef63c984d184b45dcbd99c93d

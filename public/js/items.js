@@ -144,6 +144,7 @@ CoffeePOS.prototype.saveItem = async function () {
     const active      = document.getElementById('itemActive').checked;
     const image       = document.getElementById('itemImage').value;
 
+<<<<<<< HEAD
     try {
         let result;
         if (id) {
@@ -194,5 +195,32 @@ CoffeePOS.prototype.deleteItem = async function (id) {
     } catch (error) {
         console.error('Delete item error:', error);
         this.showToast('កំហុស: ' + error.message, 'error');
+=======
+    if (id) {
+        // Convert to string for consistent comparison
+        const idStr = String(id);
+        const item = this.data.products.find(p => String(p.id) === idStr);
+        if (item) {
+            Object.assign(item, { name, category, price, salePrice, description, active, image });
+            this.showToast('បានកែសម្រួលភេសជ្ជៈ!', 'success');
+        }
+    } else {
+        this.data.products.push({ id: generateId(), name, category, price, salePrice, description, active, image, icon: categoryIcons[category] || 'fa-utensils' });
+        this.showToast('បានបន្ថែមភេសជ្ជៈ!', 'success');
+    }
+
+    saveData(this.data);
+    this.closeAllModals();
+    this.renderItems();
+};
+
+CoffeePOS.prototype.deleteItem = function (id) {
+    if (confirm('តើអ្នកចង់លុបភេសជ្ជៈនេះទេ?')) {
+        const idStr = String(id);
+        this.data.products = this.data.products.filter(p => String(p.id) !== idStr);
+        saveData(this.data);
+        this.renderItems();
+        this.showToast('បានលុបភេសជ្ជៈ!', 'success');
+>>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
     }
 };

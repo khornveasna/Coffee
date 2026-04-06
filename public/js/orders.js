@@ -158,6 +158,7 @@ CoffeePOS.prototype.exportOrders = function () {
         this.showToast('គ្មានទិន្ននយសម្រាប់ Export', 'warning');
         return;
     }
+<<<<<<< HEAD
 
     // Show export options
     const choice = prompt(
@@ -189,6 +190,9 @@ CoffeePOS.prototype.exportToExcel = function (orders) {
     // Create CSV content
     let csv = '\ufeffល.រ,លេខវិក័យបត្រ,កាលបរិច្ឆេទ,ភេសជ្ជៈ,ចំនួន,សរុប,បញ្ចុះ,វិធីទូទាត់,អ្នកបម្រើ\n';
     
+=======
+    let csv = 'ល.រ,លេខវិក័យបត្រ,កាលបរិច្ឆេទ,ភេសជ្ជៈ,ចំនួន,សរុប,បញ្ចុះ,អ្នកបម្រើ\n';
+>>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
     orders.forEach((order, index) => {
         const items = parseOrderItems(order.items);
         const itemCount = items.reduce((s, i) => s + i.quantity, 0);
