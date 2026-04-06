@@ -21,7 +21,9 @@
       "Bash(netstat *)",
       "Bash(findstr *)",
       "Bash(tasklist)",
-      "Bash(type *)"
+      "Bash(type *)",
+      "Bash(dir *)",
+      "Bash(cmd *)"
     ]
   },
   "$version": 3
