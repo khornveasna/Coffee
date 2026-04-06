@@ -1,7 +1,7 @@
 {
   "name": "coffee-pos-system",
-  "version": "2.0.0",
-  "description": "Coffee POS System - Modern Express.js Point of Sale for Coffee Shops with REST API, SQLite, and Real-time Sync",
+  "version": "1.0.0",
+  "description": "Coffee POS System - Point of Sale for Coffee Shops with REST API, SQLite, and Real-time Sync",
   "main": "server.js",
   "scripts": {
     "start": "npm run dev",
@@ -14,8 +14,7 @@
     "health-check": "curl -f http://localhost:3000/api/health || exit 1",
     "security-check": "npm audit --production",
     "clean": "rimraf logs/*.log backups/*.db",
-    "postinstall": "echo \"Installation complete! Run 'npm start' to start the server.\"",
-    "test": "echo \"No tests specified\" && exit 0"
+    "postinstall": "echo \"Installation complete! Run 'npm start' to start the server.\""
   },
   "keywords": [
     "pos",
@@ -23,13 +22,10 @@
     "point-of-sale",
     "sqlite",
     "express",
-    "rest-api",
     "real-time",
     "socket.io",
     "khmer",
-    "cambodia",
-    "mvc",
-    "modular"
+    "cambodia"
   ],
   "author": "Coffee POS System",
   "license": "MIT",
@@ -37,16 +33,12 @@
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^12.8.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.6.1",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.0",
-<<<<<<< HEAD
     "express-validator": "^7.3.2",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.3",
-=======
-    "helmet": "^7.1.0",
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
     "morgan": "^1.10.1",
     "socket.io": "^4.8.3",
     "uuid": "^9.0.0"

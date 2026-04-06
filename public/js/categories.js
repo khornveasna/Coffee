@@ -5,15 +5,9 @@ CoffeePOS.prototype.openCategoryManagement = function () {
     const modal = document.getElementById('categoryModal');
     document.getElementById('categoryForm').reset();
     this.editingCategory = null;
-<<<<<<< HEAD
     
     // Change modal title to show it's for managing categories
     document.getElementById('categoryModalTitle').innerHTML = '<i class="fas fa-tags"></i> គ្រប់គ្រងប្រភេទ';
-=======
-
-    // Change modal title to show it's for managing categories
-    document.getElementById('categoryModalTitle').innerHTML = '<i class="fas fa-tags"></i> គ្រប់គ្រងបរភេទ';
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
     document.getElementById('categoryId').value = '';
     
     // Show existing categories in the modal body before the form
@@ -79,7 +73,6 @@ CoffeePOS.prototype.renderCategories = function () {
     // Kept for backward compatibility
 };
 
-<<<<<<< HEAD
 CoffeePOS.prototype.saveCategory = async function () {
     const id = document.getElementById('categoryId').value;
     const name = document.getElementById('categoryNameEn').value.trim();
@@ -88,24 +81,11 @@ CoffeePOS.prototype.saveCategory = async function () {
 
     if (!name) {
         this.showToast('សូមបញ្ចូលឈ្មោះប្រភេទ!', 'warning');
-=======
-CoffeePOS.prototype.saveCategory = function () {
-    const id = document.getElementById('categoryId').value;
-    const name = document.getElementById('categoryNameEn').value.trim();
-    const nameKm = document.getElementById('categoryNameKm').value.trim();
-
-    if (!name) {
-        this.showToast('សូមបញ្ចូល្មោះប្ភេទ!', 'warning');
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
         return;
     }
 
     if (!nameKm) {
-<<<<<<< HEAD
         this.showToast('សូមបញ្ចូលឈ្មោះប្រភេទ (ខ្មែរ)!', 'warning');
-=======
-        this.showToast('សូមបញ្ចូល្មោះប្ភេទ (ខ្ែរ)!', 'warning');
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
         return;
     }
 
@@ -114,7 +94,6 @@ CoffeePOS.prototype.saveCategory = function () {
     }
 
     if (id) {
-<<<<<<< HEAD
         // Update existing category via API
         try {
             const result = await this.apiRequest(`/api/categories/${id}`, {
@@ -136,22 +115,6 @@ CoffeePOS.prototype.saveCategory = function () {
             console.error('Update category error:', error);
             this.showToast('កំហុស: ' + error.message, 'error');
             return;
-=======
-        const idStr = String(id);
-        const category = this.data.categories.find(c => String(c.id) === idStr);
-        if (category) {
-            Object.assign(category, { name, name_km: nameKm });
-            this.showToast('បានកែសម្រួលប្រភេទ!', 'success');
-        }
-
-        // Sync with server if socket is available
-        if (this.socket && this.socket.connected) {
-            fetch(`/api/categories/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, name_km: nameKm })
-            }).catch(err => console.error('Failed to sync category with server:', err));
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
         }
     } else {
         // Check if category name already exists
@@ -161,7 +124,6 @@ CoffeePOS.prototype.saveCategory = function () {
             return;
         }
 
-<<<<<<< HEAD
         // Create new category via API
         try {
             const result = await this.apiRequest('/api/categories', {
@@ -186,28 +148,6 @@ CoffeePOS.prototype.saveCategory = function () {
         }
     }
 
-=======
-        const newId = 'cat_' + Date.now();
-        this.data.categories.push({
-            id: newId,
-            name,
-            name_km: nameKm
-        });
-        this.showToast('បានបន្ថែមប្រភេទ!', 'success');
-
-        // Sync with server if socket is available
-        if (this.socket && this.socket.connected) {
-            fetch('/api/categories', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: newId, name, name_km: nameKm })
-            }).catch(err => console.error('Failed to sync category with server:', err));
-        }
-    }
-
-    saveData(this.data);
-    
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
     // Refresh the category management modal if it's open
     const categoryModal = document.getElementById('categoryModal');
     if (categoryModal.classList.contains('active')) {
@@ -225,11 +165,7 @@ CoffeePOS.prototype.saveCategory = function () {
     }
 };
 
-<<<<<<< HEAD
 CoffeePOS.prototype.deleteCategory = async function (id) {
-=======
-CoffeePOS.prototype.deleteCategory = function (id) {
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
     const idStr = String(id);
     // Check if any products use this category
     const productsUsingCat = this.data.products.filter(p => String(p.category) === idStr);
@@ -238,7 +174,6 @@ CoffeePOS.prototype.deleteCategory = function (id) {
         return;
     }
 
-<<<<<<< HEAD
     if (!confirm('តើអ្នកចង់លុបប្រភេទនេះទេ?')) return;
 
     try {
@@ -275,34 +210,3 @@ CoffeePOS.prototype.deleteCategory = function (id) {
 };
 
 // Icon preview update - REMOVED (no longer needed)
-=======
-    if (confirm('តើអ្នកចង់លុបប្រភេទនេះទេ?')) {
-        this.data.categories = this.data.categories.filter(c => String(c.id) !== idStr);
-        saveData(this.data);
-        this.showToast('បានលុបប្រភេទ!', 'success');
-        
-        // Refresh the category management modal if it's open
-        const categoryModal = document.getElementById('categoryModal');
-        if (categoryModal.classList.contains('active')) {
-            this.openCategoryManagement();
-        }
-        
-        // Also refresh items to update the filter dropdown
-        if (this.currentPage === 'items') {
-            this.renderItems();
-        }
-        
-        // Refresh POS category buttons
-        if (this.currentPage === 'pos') {
-            this.renderCategoryButtons();
-        }
-        
-        // Sync with server if socket is available
-        if (this.socket && this.socket.connected) {
-            fetch(`/api/categories/${id}`, {
-                method: 'DELETE'
-            }).catch(err => console.error('Failed to sync category deletion with server:', err));
-        }
-    }
-};
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e

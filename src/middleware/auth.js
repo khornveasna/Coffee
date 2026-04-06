@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // Authentication Middleware with JWT
 const jwt = require('jsonwebtoken');
 
@@ -50,24 +49,11 @@ class AuthMiddleware {
                 message: 'Invalid token.'
             });
         }
-=======
-// Authentication Middleware
-class AuthMiddleware {
-    // Optional: Add JWT or session-based authentication here
-    // For now, we're using the client-side authentication pattern
-    // This middleware can be extended to validate tokens
-    
-    authenticate(req, res, next) {
-        // If you want to add token-based authentication, implement it here
-        // For now, we'll allow all requests through and let the frontend handle auth
-        next();
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
     }
 
     // Check if user has required permissions
     requirePermission(permission) {
         return (req, res, next) => {
-<<<<<<< HEAD
             if (!req.user) {
                 return res.status(401).json({
                     success: false,
@@ -79,19 +65,6 @@ class AuthMiddleware {
             const hasPermission = isAdmin || req.user.permissions.includes(permission);
 
             if (!hasPermission) {
-=======
-            const { userRole, permissions } = req.query;
-            
-            if (!userRole && !permissions) {
-                // Allow request to continue if no user context provided
-                return next();
-            }
-
-            const userPermissions = permissions ? JSON.parse(permissions) : [];
-            const isAdmin = userRole === 'admin';
-
-            if (!isAdmin && !userPermissions.includes(permission)) {
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
                 return res.status(403).json({
                     success: false,
                     message: 'អ្នកមិនមានសិទ្ធិចូលប្រើប្រាស់ផ្នែកនេះទេ!'
@@ -104,7 +77,6 @@ class AuthMiddleware {
 
     // Check if user is admin
     requireAdmin(req, res, next) {
-<<<<<<< HEAD
         if (!req.user) {
             return res.status(401).json({
                 success: false,
@@ -113,11 +85,6 @@ class AuthMiddleware {
         }
 
         if (req.user.role !== 'admin') {
-=======
-        const { userRole } = req.query;
-
-        if (userRole && userRole !== 'admin') {
->>>>>>> 1c4cfcfa268777b324e7573d177d9ac99cf2354e
             return res.status(403).json({
                 success: false,
                 message: 'មានតែ Admin ទេដែលអាចចូលប្រើប្រាស់ផ្នែកនេះ!'

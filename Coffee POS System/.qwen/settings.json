@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(icacls *)",
+      "Bash(oi)",
+      "Bash(ci)",
+      "Bash(r *)",
+      "Bash(iisreset)",
+      "Bash(%windir%\\system32\\inetsrv\\appcmd.exe *)"
+    ]
+  },
+  "$version": 3
+}

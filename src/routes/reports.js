@@ -1,20 +1,3 @@
-<<<<<<< HEAD
-// Report Routes
-const express = require('express');
-const router = express.Router();
-const reportController = require('../controllers/reportController');
-
-// GET /api/reports/summary - Get report summary
-router.get('/summary', reportController.getSummary);
-
-// GET /api/reports/sales-by-date - Get sales by date
-router.get('/sales-by-date', reportController.getSalesByDate);
-
-// GET /api/reports/top-products - Get top products
-router.get('/top-products', reportController.getTopProducts);
-
-module.exports = router;
-=======
 const express = require('express');
 const authMiddleware = require('../middleware/auth');
 
@@ -70,4 +53,3 @@ module.exports = function reportsRoutes(db) {
 
     return router;
 };
->>>>>>> acbaef74e4deb37ef63c984d184b45dcbd99c93d
