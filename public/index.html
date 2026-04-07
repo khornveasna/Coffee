@@ -35,6 +35,27 @@
 
     <!-- Main Application -->
     <div id="appScreen" class="app-screen hidden">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <button id="menuToggle" class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="mobile-logo">
+                <i class="fas fa-coffee"></i>
+                <span>Coffee POS</span>
+            </div>
+            <button id="cartToggle" class="menu-toggle cart-toggle">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="mobileCartCount" class="cart-badge">0</span>
+            </button>
+        </header>
+
+        <!-- Overlay for mobile menu -->
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+        
+        <!-- Overlay for cart -->
+        <div id="cartOverlay" class="cart-overlay"></div>
+
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">

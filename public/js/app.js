@@ -85,9 +85,96 @@ class CoffeePOS {
         document.getElementById('loginForm').addEventListener('submit', e => { e.preventDefault(); this.login(); });
         document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
 
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const cartToggle = document.getElementById('cartToggle');
+        const cartSection = document.querySelector('.cart-section');
+        const cartOverlay = document.getElementById('cartOverlay');
+        
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                
+                // Close cart if open
+                if (cartSection) {
+                    cartSection.classList.remove('active');
+                    cartOverlay.classList.remove('active');
+                }
+                
+                // Toggle icon
+                const icon = menuToggle.querySelector('i');
+                if (sidebar.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        }
+        
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                const icon = menuToggle?.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        }
+        
+        // Cart toggle for mobile
+        if (cartToggle) {
+            cartToggle.addEventListener('click', () => {
+                cartSection.classList.toggle('active');
+                cartOverlay.classList.toggle('active');
+                
+                // Close sidebar if open
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    const icon = menuToggle?.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                }
+            });
+        }
+        
+        if (cartOverlay) {
+            cartOverlay.addEventListener('click', () => {
+                cartSection.classList.remove('active');
+                cartOverlay.classList.remove('active');
+            });
+        }
+
         // Navigation
         document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', e => { e.preventDefault(); this.navigate(item.dataset.page); });
+            item.addEventListener('click', e => { 
+                e.preventDefault(); 
+                this.navigate(item.dataset.page);
+                
+                // Close sidebar and cart on mobile after navigation
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    const menuIcon = menuToggle?.querySelector('i');
+                    if (menuIcon) {
+                        menuIcon.classList.remove('fa-times');
+                        menuIcon.classList.add('fa-bars');
+                    }
+                    
+                    // Close cart
+                    cartSection.classList.remove('active');
+                    cartOverlay.classList.remove('active');
+                }
+            });
         });
 
         // POS

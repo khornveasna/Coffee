@@ -133,6 +133,19 @@ CoffeePOS.prototype.renderCart = function () {
     }
 
     document.getElementById('cartCount').textContent = `(${this.cart.reduce((s, i) => s + i.quantity, 0)})`;
+    
+    // Update mobile cart badge
+    const mobileCartCount = document.getElementById('mobileCartCount');
+    if (mobileCartCount) {
+        const totalItems = this.cart.reduce((s, i) => s + i.quantity, 0);
+        mobileCartCount.textContent = totalItems;
+        if (totalItems > 0) {
+            mobileCartCount.classList.remove('hidden');
+        } else {
+            mobileCartCount.classList.add('hidden');
+        }
+    }
+    
     this.updateCartTotals();
 };
 
